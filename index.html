@@ -39,9 +39,7 @@ nav{position:fixed;top:42px;left:0;width:100%;z-index:100;padding:0 48px;height:
 /* HERO */
 .hero{position:relative;height:100vh;overflow:hidden;background:#000;}
 .hero-video-wrap{position:absolute;inset:0;overflow:hidden;background:#000;}
-.hero-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block;z-index:1;pointer-events:none;user-select:none;-webkit-user-select:none;}
-.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;pointer-events:none;z-index:2;visibility:hidden;opacity:0;transition:opacity 0.5s ease;}
-.hero-video.hv-playing{visibility:visible;opacity:1;}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block;pointer-events:none;}
 /* Hide ALL native video controls/overlays across browsers */
 video::-webkit-media-controls{display:none!important;-webkit-appearance:none!important;}
 video::-webkit-media-controls-enclosure{display:none!important;-webkit-appearance:none!important;}
@@ -630,8 +628,7 @@ button{position:relative;overflow:hidden;}
 <!-- HERO SLIDER -->
 <section class="hero">
   <div class="hero-video-wrap">
-    <img class="hero-poster" id="heroPoster" src="IMAGES/PHOTO%201.jpeg" alt="">
-    <video class="hero-video" id="heroVid" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" x5-video-orientation="portrait" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" tabindex="-1" aria-hidden="true" poster="IMAGES/PHOTO%201.jpeg">
+    <video class="hero-video" id="heroVid" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1">
       <source src="IMAGES/hero_video_2.mp4" type="video/mp4">
     </video>
     <div class="slide-overlay"></div>
@@ -1041,51 +1038,33 @@ if(editTitle){
   },{threshold:0.25}).observe(editTitle);
 }
 
-// HERO VIDEO — autoplay or NUKE the element (no play button can ever appear)
+// HERO VIDEO — force autoplay everywhere
 (function(){
   var v=document.getElementById('heroVid');
   if(!v)return;
   v.muted=true;
   v.volume=0;
-  v.setAttribute('muted','');
-  var played=false;
   function tryPlay(){
-    if(played)return;
     v.muted=true;
     try{
       var p=v.play();
       if(p&&p.catch)p.catch(function(){});
     }catch(e){}
   }
-  v.addEventListener('playing',function(){
-    played=true;
-    v.classList.add('hv-playing');
-  });
   v.addEventListener('canplay',tryPlay);
   v.addEventListener('loadeddata',tryPlay);
   tryPlay();
-  setTimeout(tryPlay,80);
-  setTimeout(tryPlay,300);
-  setTimeout(tryPlay,800);
-  ['touchstart','touchend','click','scroll','mousemove','keydown','pointerdown'].forEach(function(e){
+  setTimeout(tryPlay,100);
+  setTimeout(tryPlay,500);
+  ['touchstart','touchend','click','scroll','pointerdown'].forEach(function(e){
     document.addEventListener(e,function h(){
       tryPlay();
-      if(played)document.removeEventListener(e,h,true);
+      if(!v.paused)document.removeEventListener(e,h,true);
     },{passive:true,capture:true});
   });
   document.addEventListener('visibilitychange',function(){
     if(!document.hidden)tryPlay();
   });
-  // NUCLEAR: if video hasn't started after 2.5s, remove from DOM entirely
-  setTimeout(function(){
-    if(!played){
-      try{v.pause();}catch(e){}
-      v.removeAttribute('src');
-      while(v.firstChild)v.removeChild(v.firstChild);
-      v.load();
-      v.parentNode&&v.parentNode.removeChild(v);
-    }
-  },2500);
 })();
 
 </script>
