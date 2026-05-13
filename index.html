@@ -628,7 +628,7 @@ button{position:relative;overflow:hidden;}
 <!-- HERO SLIDER -->
 <section class="hero">
   <div class="hero-video-wrap">
-    <video class="hero-video" id="heroVid" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1">
+    <video class="hero-video" id="hero-video" autoplay muted loop playsinline preload="auto">
       <source src="IMAGES/hero_video_2.mp4" type="video/mp4">
     </video>
     <div class="slide-overlay"></div>
@@ -1038,34 +1038,13 @@ if(editTitle){
   },{threshold:0.25}).observe(editTitle);
 }
 
-// HERO VIDEO — force autoplay everywhere
-(function(){
-  var v=document.getElementById('heroVid');
-  if(!v)return;
-  v.muted=true;
-  v.volume=0;
-  function tryPlay(){
-    v.muted=true;
-    try{
-      var p=v.play();
-      if(p&&p.catch)p.catch(function(){});
-    }catch(e){}
-  }
-  v.addEventListener('canplay',tryPlay);
-  v.addEventListener('loadeddata',tryPlay);
-  tryPlay();
-  setTimeout(tryPlay,100);
-  setTimeout(tryPlay,500);
-  ['touchstart','touchend','click','scroll','pointerdown'].forEach(function(e){
-    document.addEventListener(e,function h(){
-      tryPlay();
-      if(!v.paused)document.removeEventListener(e,h,true);
-    },{passive:true,capture:true});
-  });
-  document.addEventListener('visibilitychange',function(){
-    if(!document.hidden)tryPlay();
-  });
-})();
+// HERO VIDEO — force autoplay on any device/browser
+const video = document.querySelector('#hero-video');
+video.muted = true;
+video.play().catch(() => {
+  document.addEventListener('touchstart', () => video.play(), { once: true });
+  document.addEventListener('click', () => video.play(), { once: true });
+});
 
 </script>
 </body>
